@@ -1,23 +1,25 @@
-
 # Lab 5: Static Code Analysis — Issues and Fixes
 
-| Issue | Tool | Fix applied |
-|---|---|---|
-| Unsafe eval() | Bandit | Replaced expression evaluation with validated numeric discount input |
-| Weak MD5 hash | Bandit | Replaced MD5 with SHA-256 |
-| Insecure OTP generation | Bandit | Used the secrets module |
-| Hardcoded registrar token | Security review | Read token from an environment variable |
-| Shell command execution | Bandit | Removed os.system() and used print() |
-| Mutable default list | Pylint | Replaced [] with None and initialized inside the function |
-| Missing docstrings | Pylint | Added module and function documentation |
-| Naming convention violations | Pylint | Used snake_case for functions and uppercase constants |
-| Unused imports and variables | Pylint | Removed unused imports and variables |
-| File handling and encoding | Pylint | Used with open() and explicit UTF-8 encoding |
-| Whitespace and formatting | Flake8 | Corrected formatting and blank-line issues |
+Line numbers refer to the original `course_enrollment_system.py` before fixes.
 
-## Verification
+| Issue | Type | Line(s) | Description | Fix Approach |
+|---|---|---:|---|---|
+| Mutable default argument | Bug | 15 | `audit_trail=[]` creates a shared mutable default that can retain values across calls. | Changed the default to `None` and initialized the list inside the function. |
+| Broad exception handler | Code quality | 27–32 | A bare `except` hides unexpected errors. | Removed the broad handler and checked whether the course ID exists. |
+| Unsafe `eval()` | Security (Bandit B307) | 45–47 | Evaluating a string can execute unintended Python expressions. | Replaced expression evaluation with a numeric discount rate and validated its range. |
+| Weak MD5 hash | Security (Bandit B324) | 51–52 | MD5 is unsuitable for modern security-sensitive hashing. | Replaced MD5 with SHA-256. |
+| Insecure OTP generator | Security (Bandit B311) | 55–56 | Ordinary pseudo-random generation is unsuitable for security-sensitive tokens. | Used the `secrets` module. |
+| Shell command execution | Security (Bandit B605) | 59–63 | `os.system()` starts a shell unnecessarily and can introduce command-injection risk. | Removed shell execution and printed the export message directly. |
+| Hardcoded registrar token | Security (Bandit B105) | 74–75 | A fixed secret was embedded in source code. | Read the token from the `REGISTRAR_AUTH_TOKEN` environment variable and never print the secret itself. |
+| Naming and missing docstrings | Code quality (Pylint) | Multiple | Function names did not use snake_case and functions lacked documentation. | Renamed functions and added docstrings. |
+| Unused imports and variables | Code quality (Pylint / Flake8) | 4, 36, 46, 68 | Unused code produced warnings and reduced maintainability. | Removed unused imports and variables and simplified functions. |
+| File handling and formatting | Code quality (Pylint / Flake8) | 60–63 and multiple | File encoding was implicit, the file was closed manually, and some lines were too long. | Used a context manager with UTF-8 encoding and formatted long lines. |
 
-- Pylint: 10.00/10
-- Bandit: No issues identified
-- Flake8: No violations reported
-- Program: Runs successfully
+## Verification Results
+
+- Pylint: 10.00/10 (recorded in `pylint_report_after.txt`).
+- Bandit: no issues identified (recorded in `bandit_report_after.txt`).
+- Flake8: the after-report is empty, indicating no reported violations.
+- Program: ran successfully and generated `course_roster.txt`.
+
+The before reports preserve results from the original version. The after reports record the checks after the fixes.
